@@ -8,6 +8,9 @@ def main():
         encoding='utf-8')
 
     while True:
+        quit = input('Please type "Q" to quit or anything else to continue: ')
+        if len(quit) > 0 and quit[0].lower() == 'q':
+            break
         country_selection = input('Please enter a comma-and-space-separated list of countries'
                                   '(e.g., "France, Germany, United Kingdom, United States"): ').strip()
         countries = country_selection.split(', ')
