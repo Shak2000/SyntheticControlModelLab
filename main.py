@@ -1,12 +1,26 @@
 import numpy as np
 
 
-def main():
-    db = np.genfromtxt(
-        'gdp-per-capita-maddison-project-database.csv', delimiter=',',
-        dtype=[('Entity', 'U100'), ('Code', 'U10'), ('Year', 'i4'), ('GDPPerCapita', 'f8'), ('annotations', 'U200')],
-        encoding='utf-8')
+class Database:
+    def __init__(self, file):
+        self.data = np.genfromtxt(file, delimiter=',',
+                                  dtype=[('Entity', 'U100'), ('Code', 'U10'), ('Year', 'i4'), ('GDPPerCapita', 'f8'),
+                                         ('annotations', 'U200')],
+                                  encoding='utf-8')
 
+    def extract(self, countries, min_year, max_year):
+        country_column = self.data['Entity']
+        year_column = self.data['Year']
+        year_column_int = year_column.astype(int)
+        country_mask = np.isin(country_column, countries)
+        year_min_mask = year_column_int >= min_year
+        year_max_mask = year_column_int <= max_year
+        final_mask = country_mask & year_min_mask & year_max_mask
+        return self.data[final_mask]
+
+
+def main():
+    db = Database('gdp-per-capita-maddison-project-database.csv')
     while True:
         quit = input('Please type "Q" to quit or anything else to continue: ')
         if len(quit) > 0 and quit[0].lower() == 'q':
@@ -36,14 +50,7 @@ def main():
             except Exception as e:
                 print(f"Error: {e}. The year should be an integer. Please try again.")
 
-        country_column = db['Entity']
-        year_column = db['Year']
-        year_column_int = year_column.astype(int)
-        country_mask = np.isin(country_column, countries)
-        year_min_mask = year_column_int >= min_year
-        year_max_mask = year_column_int <= max_year
-        final_mask = country_mask & year_min_mask & year_max_mask
-        filtered_data = db[final_mask]
+        filtered_data = db.extract(countries, min_year, max_year)
         print(f'--- Data from {min_year} to {max_year} for the following countries: {country_selection} ---')
         print(filtered_data)
 
